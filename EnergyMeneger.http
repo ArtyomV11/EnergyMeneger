@@ -1,0 +1,6 @@
+@EnergyMeneger_HostAddress = http://localhost:5098
+
+GET {{EnergyMeneger_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
