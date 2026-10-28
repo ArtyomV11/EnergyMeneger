@@ -20,14 +20,14 @@ public static class Bootstrap
             config["Bootstrap:Login"], "Логин владельца", 100);
 
         var password = config["Bootstrap:Password"];
-        AuthService.ValidatePassword(password);
+        AuthService.ValidatePassword(password, "Пароль владельца (Bootstrap:Password)");
 
         var foremanLogin = Rules.Text(config["Bootstrap:ForemanLogin"] ?? "foreman3", "Логин прораба", 100);
         var workerLogin = Rules.Text(config["Bootstrap:WorkerLogin"] ?? "worker3", "Логин рабочего", 100);
         var foremanPassword = config["Bootstrap:ForemanPassword"];
         var workerPassword = config["Bootstrap:WorkerPassword"];
-        AuthService.ValidatePassword(foremanPassword);
-        AuthService.ValidatePassword(workerPassword);
+        AuthService.ValidatePassword(foremanPassword, "Пароль прораба (Bootstrap:ForemanPassword)");
+        AuthService.ValidatePassword(workerPassword, "Пароль рабочего (Bootstrap:WorkerPassword)");
         Rules.Require(new[] { login, foremanLogin, workerLogin }
             .Select(User.Normalize).Distinct().Count() == 3,
             "Логины владельца, прораба и рабочего должны различаться.");

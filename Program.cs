@@ -21,7 +21,7 @@ var builder = WebApplication.CreateBuilder(
 
 var connectionString = builder.Configuration.GetConnectionString("Database")
     ?? throw new InvalidOperationException(
-        "Не задана строка подключения ConnectionStrings:Database.");
+        "РќРµ Р·Р°РґР°РЅР° СЃС‚СЂРѕРєР° РїРѕРґРєР»СЋС‡РµРЅРёСЏ ConnectionStrings:Database.");
 
 var jwtKey = builder.Configuration["Jwt:Key"];
 
@@ -29,7 +29,7 @@ if (string.IsNullOrWhiteSpace(jwtKey) ||
     Encoding.UTF8.GetByteCount(jwtKey) < 32)
 {
     throw new InvalidOperationException(
-        "Задайте Jwt:Key длиной минимум 32 байта через User Secrets.");
+        "Р—Р°РґР°Р№С‚Рµ Jwt:Key РґР»РёРЅРѕР№ РјРёРЅРёРјСѓРј 32 Р±Р°Р№С‚Р° С‡РµСЂРµР· User Secrets.");
 }
 
 builder.Services.AddDbContext<EnergyDbContext>(options =>
@@ -53,11 +53,11 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
         var errors = context.ModelState.Values
             .SelectMany(x => x.Errors)
             .Select(x => string.IsNullOrWhiteSpace(x.ErrorMessage)
-                ? "Некорректное значение."
+                ? "РќРµРєРѕСЂСЂРµРєС‚РЅРѕРµ Р·РЅР°С‡РµРЅРёРµ."
                 : x.ErrorMessage);
 
         return new BadRequestObjectResult(
-            new ErrorDto("Некорректный запрос: " + string.Join(" ", errors)));
+            new ErrorDto("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ Р·Р°РїСЂРѕСЃ: " + string.Join(" ", errors)));
     };
 });
 
@@ -91,7 +91,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 var principal = await service.ValidatePrincipal(context.Principal);
 
                 if (principal == null)
-                    context.Fail("Учётная запись недоступна.");
+                    context.Fail("РЈС‡С‘С‚РЅР°СЏ Р·Р°РїРёСЃСЊ РЅРµРґРѕСЃС‚СѓРїРЅР°.");
                 else
                     context.Principal = principal;
             },
@@ -103,7 +103,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 context.Response.Headers.WWWAuthenticate = "Bearer";
 
                 await context.Response.WriteAsJsonAsync(
-                    new ErrorDto("Требуется действующая авторизация."));
+                    new ErrorDto("РўСЂРµР±СѓРµС‚СЃСЏ РґРµР№СЃС‚РІСѓСЋС‰Р°СЏ Р°РІС‚РѕСЂРёР·Р°С†РёСЏ."));
             },
 
             OnForbidden = async context =>
@@ -111,7 +111,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 context.Response.StatusCode = StatusCodes.Status403Forbidden;
 
                 await context.Response.WriteAsJsonAsync(
-                    new ErrorDto("Недостаточно прав."));
+                    new ErrorDto("РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РїСЂР°РІ."));
             }
         };
     });
@@ -136,7 +136,7 @@ builder.Services.AddRateLimiter(options =>
     options.OnRejected = async (context, cancellationToken) =>
     {
         await context.HttpContext.Response.WriteAsJsonAsync(
-            new ErrorDto("Слишком много попыток входа. Повторите через минуту."),
+            new ErrorDto("РЎР»РёС€РєРѕРј РјРЅРѕРіРѕ РїРѕРїС‹С‚РѕРє РІС…РѕРґР°. РџРѕРІС‚РѕСЂРёС‚Рµ С‡РµСЂРµР· РјРёРЅСѓС‚Сѓ."),
             cancellationToken);
     };
 });
@@ -147,7 +147,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
     {
-        Title = "Управление энергопотреблением завода",
+        Title = "РЈРїСЂР°РІР»РµРЅРёРµ СЌРЅРµСЂРіРѕРїРѕС‚СЂРµР±Р»РµРЅРёРµРј Р·Р°РІРѕРґР°",
         Version = "v1"
     });
 
@@ -158,7 +158,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Вставьте JWT без слова Bearer."
+        Description = "Р’СЃС‚Р°РІСЊС‚Рµ JWT Р±РµР· СЃР»РѕРІР° Bearer."
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -206,17 +206,17 @@ app.Use(async (context, next) =>
 
         await context.Response.WriteAsJsonAsync(
             new ErrorDto(
-                "Операция нарушает уникальность данных или связи базы."));
+                "РћРїРµСЂР°С†РёСЏ РЅР°СЂСѓС€Р°РµС‚ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚СЊ РґР°РЅРЅС‹С… РёР»Рё СЃРІСЏР·Рё Р±Р°Р·С‹."));
     }
     catch (Exception exception)
     {
-        app.Logger.LogError(exception, "Необработанная ошибка API.");
+        app.Logger.LogError(exception, "РќРµРѕР±СЂР°Р±РѕС‚Р°РЅРЅР°СЏ РѕС€РёР±РєР° API.");
 
         context.Response.StatusCode =
             StatusCodes.Status500InternalServerError;
 
         await context.Response.WriteAsJsonAsync(
-            new ErrorDto("Внутренняя ошибка сервера."));
+            new ErrorDto("Р’РЅСѓС‚СЂРµРЅРЅСЏСЏ РѕС€РёР±РєР° СЃРµСЂРІРµСЂР°."));
     }
 });
 

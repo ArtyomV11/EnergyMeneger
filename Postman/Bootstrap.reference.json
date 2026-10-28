@@ -1,5 +1,5 @@
 {
-  "sourceCommit": "26736fc7c5818ec494c610f3d52c6b3e5efad20c",
+  "source": "Current local repository — fixed layout",
   "factory": {
     "name": "Учебный завод"
   },
@@ -10,21 +10,21 @@
   "workshops": [
     {
       "name": "Цех №1",
-      "powerLimitKw": 70,
+      "powerLimitKw": 100,
       "simulationType": "Virtual",
       "minPowerKw": 30,
       "maxPowerKw": 70
     },
     {
       "name": "Цех №2",
-      "powerLimitKw": 90,
+      "powerLimitKw": 100,
       "simulationType": "Virtual",
       "minPowerKw": 40,
       "maxPowerKw": 90
     },
     {
       "name": "Цех №3",
-      "powerLimitKw": 140,
+      "powerLimitKw": 100,
       "simulationType": "EquipmentBased",
       "minPowerKw": null,
       "maxPowerKw": null
@@ -32,71 +32,85 @@
   ],
   "equipment": [
     {
-      "workshopName": "Цех №3",
       "name": "Токарный станок",
       "minPowerKw": 20,
       "maxPowerKw": 45,
       "priority": "Important",
       "allowAutoShutdown": true,
+      "workshopName": "Цех №3",
       "isEnabled": false,
       "currentPowerKw": 0
     },
     {
-      "workshopName": "Цех №3",
       "name": "Фрезерный станок",
       "minPowerKw": 25,
       "maxPowerKw": 55,
       "priority": "Important",
       "allowAutoShutdown": true,
+      "workshopName": "Цех №3",
       "isEnabled": false,
       "currentPowerKw": 0
     },
     {
-      "workshopName": "Цех №3",
       "name": "Сверлильный станок",
       "minPowerKw": 5,
       "maxPowerKw": 15,
       "priority": "Secondary",
       "allowAutoShutdown": true,
+      "workshopName": "Цех №3",
       "isEnabled": false,
       "currentPowerKw": 0
     },
     {
-      "workshopName": "Цех №3",
       "name": "Компрессор",
       "minPowerKw": 15,
       "maxPowerKw": 35,
       "priority": "Secondary",
       "allowAutoShutdown": true,
+      "workshopName": "Цех №3",
       "isEnabled": false,
       "currentPowerKw": 0
     },
     {
-      "workshopName": "Цех №3",
       "name": "Вентиляция",
       "minPowerKw": 5,
       "maxPowerKw": 12,
       "priority": "Critical",
       "allowAutoShutdown": false,
+      "workshopName": "Цех №3",
       "isEnabled": false,
       "currentPowerKw": 0
     },
     {
-      "workshopName": "Цех №3",
       "name": "Освещение",
       "minPowerKw": 3,
       "maxPowerKw": 8,
       "priority": "Critical",
       "allowAutoShutdown": false,
+      "workshopName": "Цех №3",
       "isEnabled": false,
       "currentPowerKw": 0
     }
   ],
-  "owner": {
-    "loginSource": "Bootstrap:Login",
-    "passwordSource": "Bootstrap:Password",
-    "role": "Owner",
-    "status": "Active"
-  },
-  "note": "IDs are assigned by the database. Bootstrap creates no Foreman or Worker. Do not replay these records through POST against an initialized database."
+  "users": [
+    {
+      "role": "Owner",
+      "loginSource": "Bootstrap:Login",
+      "passwordSource": "Bootstrap:Password"
+    },
+    {
+      "role": "Foreman",
+      "defaultLogin": "foreman3",
+      "loginSource": "Bootstrap:ForemanLogin",
+      "passwordSource": "Bootstrap:ForemanPassword",
+      "workshopName": "Цех №3"
+    },
+    {
+      "role": "Worker",
+      "defaultLogin": "worker3",
+      "loginSource": "Bootstrap:WorkerLogin",
+      "passwordSource": "Bootstrap:WorkerPassword",
+      "workshopName": "Цех №3"
+    }
+  ]
 }

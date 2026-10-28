@@ -1,8 +1,6 @@
-# DTO из main
+# Реальные DTO текущего репозитория
 
-Commit: 26736fc7c5818ec494c610f3d52c6b3e5efad20c
-
-JSON: camelCase, enum — строки (Program.cs, JsonStringEnumConverter). Ниже точные C# контракты; nullable поля передаются как null.
+JSON: camelCase, enum — строки. Пароли берутся из ваших настроек Bootstrap.
 
 ## CreateUserRequest.cs
 
@@ -204,4 +202,3 @@ public sealed record WorkshopRequest(
     double? MinPowerKw,
     double? MaxPowerKw);
 ```
-

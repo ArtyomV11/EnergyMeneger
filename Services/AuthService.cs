@@ -15,11 +15,11 @@ public sealed class AuthService(
     IConfiguration configuration,
     IPasswordHasher<User> hasher)
 {
-    public static void ValidatePassword(string? password)
+    public static void ValidatePassword(string? password, string field = "Пароль")
     {
         Rules.Require(
             password is { Length: >= 12 and <= 128 },
-            "Пароль должен содержать от 12 до 128 символов.");
+            $"{field} должен содержать от 12 до 128 символов.");
     }
 
     public async Task<TokenDto> Login(LoginRequest request)
