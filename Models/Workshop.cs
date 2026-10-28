@@ -97,6 +97,8 @@ public sealed class Workshop
         double? max)
     {
         Rules.Limit(limit);
+        Rules.Require(limit == PlantLayout.WorkshopLimitKw,
+            "Лимит каждого цеха фиксирован: 100 кВт.", 409);
         Rules.EnumValue(type);
 
         if (type == SimulationType.Virtual)

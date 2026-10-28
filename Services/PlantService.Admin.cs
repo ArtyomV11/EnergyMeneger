@@ -33,6 +33,11 @@ public sealed partial class PlantService
         {
             var user = await Actor(true);
 
+            Rules.Require(id.HasValue,
+                "Состав завода фиксирован: создание дополнительных цехов запрещено.", 409);
+            Rules.Require(r.PowerLimitKw == PlantLayout.WorkshopLimitKw,
+                "Лимит каждого цеха фиксирован: 100 кВт.", 409);
+
             var station = await db.Substations
                 .SingleAsync(x => x.FactoryId == user.FactoryId);
 
@@ -49,60 +54,30 @@ public sealed partial class PlantService
             Rules.Require(allocated + r.PowerLimitKw <= station.PowerLimitKw,
                 "Сумма лимитов цехов превысит лимит подстанции.", 409);
 
-            Workshop w;
+            var w = await WorkshopById(id!.Value);
+            Access(user, w);
 
-            if (id.HasValue)
-            {
-                w = await WorkshopById(id.Value);
-                Access(user, w);
+            Rules.Require(w.SimulationType == r.SimulationType,
+                "Тип моделирования существующего цеха менять нельзя.");
 
-                Rules.Require(w.SimulationType == r.SimulationType,
-                    "Тип моделирования существующего цеха менять нельзя.");
+            w.Update(r.Name, r.PowerLimitKw, r.MinPowerKw, r.MaxPowerKw);
 
-                w.Update(r.Name, r.PowerLimitKw, r.MinPowerKw, r.MaxPowerKw);
-
-                Log(user.FactoryId, ActionType.SettingsChanged,
-                    $"Изменены настройки цеха {w.Id}: {w.Name}.",
-                    user.Id, w.Id);
-            }
-            else
-            {
-                w = new Workshop(
-                    user.FactoryId, r.Name, r.PowerLimitKw,
-                    r.SimulationType, r.MinPowerKw, r.MaxPowerKw);
-
-                db.Workshops.Add(w);
-                await db.SaveChangesAsync();
-
-                Log(user.FactoryId, ActionType.WorkshopCreated,
-                    $"Создан цех {w.Id}: {w.Name}.", user.Id);
-            }
+            Log(user.FactoryId, ActionType.SettingsChanged,
+                $"Изменены настройки цеха {w.Id}: {w.Name}.",
+                user.Id, w.Id);
 
             await Snapshot(user.FactoryId);
             return Map(w);
         });
 
-    public Task<MessageDto> DeleteWorkshop(int id) => Execute(async () =>
+    public Task<MessageDto> DeleteWorkshop(int id) => Execute<MessageDto>(async () =>
     {
         var user = await Actor(true);
         var w = await WorkshopById(id);
         Access(user, w);
 
-        var used =
-            await db.Equipment.AnyAsync(x => x.WorkshopId == id) ||
-            await db.Users.AnyAsync(x => x.WorkshopId == id) ||
-            await db.WorkshopHistory.AnyAsync(x => x.WorkshopId == id) ||
-            await db.ActionLogs.AnyAsync(x => x.WorkshopId == id);
-
-        Rules.Require(!used,
-            "Нельзя удалить цех с оборудованием, сотрудниками или историей.", 409);
-
-        db.Workshops.Remove(w);
-
-        Log(user.FactoryId, ActionType.WorkshopDeleted,
-            $"Удалён цех {id}: {w.Name}.", user.Id);
-
-        return new MessageDto("Цех удалён.");
+        throw new ApiException(409,
+            "Состав завода фиксирован: удаление цехов запрещено.");
     });
 
     public Task<SubstationDto> GetSubstation() => Execute(async () =>
@@ -119,6 +94,9 @@ public sealed partial class PlantService
         Execute(async () =>
         {
             var user = await Actor(true);
+
+            Rules.Require(r.PowerLimitKw == PlantLayout.SubstationLimitKw,
+                "Лимит подстанции фиксирован: 300 кВт.", 409);
 
             var s = await db.Substations
                 .SingleAsync(x => x.FactoryId == user.FactoryId);

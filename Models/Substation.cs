@@ -14,6 +14,8 @@ public sealed class Substation
         FactoryId = factoryId;
         Name = Rules.Text(name, "Название подстанции");
         Rules.Limit(limit);
+        Rules.Require(limit == PlantLayout.SubstationLimitKw,
+            "Лимит подстанции фиксирован: 300 кВт.", 409);
         PowerLimitKw = limit;
     }
 
@@ -37,6 +39,8 @@ public sealed class Substation
     {
         var checkedName = Rules.Text(name, "Название подстанции");
         Rules.Limit(limit);
+        Rules.Require(limit == PlantLayout.SubstationLimitKw,
+            "Лимит подстанции фиксирован: 300 кВт.", 409);
 
         Rules.Require(workshopLimits <= limit,
             "Лимит подстанции меньше суммы лимитов цехов.", 409);

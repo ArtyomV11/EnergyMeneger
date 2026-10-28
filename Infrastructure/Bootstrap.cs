@@ -22,6 +22,16 @@ public static class Bootstrap
         var password = config["Bootstrap:Password"];
         AuthService.ValidatePassword(password);
 
+        var foremanLogin = Rules.Text(config["Bootstrap:ForemanLogin"] ?? "foreman3", "Логин прораба", 100);
+        var workerLogin = Rules.Text(config["Bootstrap:WorkerLogin"] ?? "worker3", "Логин рабочего", 100);
+        var foremanPassword = config["Bootstrap:ForemanPassword"];
+        var workerPassword = config["Bootstrap:WorkerPassword"];
+        AuthService.ValidatePassword(foremanPassword);
+        AuthService.ValidatePassword(workerPassword);
+        Rules.Require(new[] { login, foremanLogin, workerLogin }
+            .Select(User.Normalize).Distinct().Count() == 3,
+            "Логины владельца, прораба и рабочего должны различаться.");
+
         await db.Database.MigrateAsync();
 
         Rules.Require(!await db.Factories.AnyAsync(),
@@ -34,18 +44,18 @@ public static class Bootstrap
         await db.SaveChangesAsync();
 
         db.Substations.Add(new Substation(
-            factory.Id, "Главная подстанция", 300));
+            factory.Id, "Главная подстанция", PlantLayout.SubstationLimitKw));
 
         var w1 = new Workshop(
-            factory.Id, "Цех №1", 70,
+            factory.Id, "Цех №1", PlantLayout.WorkshopLimitKw,
             SimulationType.Virtual, 30, 70);
 
         var w2 = new Workshop(
-            factory.Id, "Цех №2", 90,
+            factory.Id, "Цех №2", PlantLayout.WorkshopLimitKw,
             SimulationType.Virtual, 40, 90);
 
         var w3 = new Workshop(
-            factory.Id, "Цех №3", 140,
+            factory.Id, "Цех №3", PlantLayout.WorkshopLimitKw,
             SimulationType.EquipmentBased, null, null);
 
         db.Workshops.AddRange(w1, w2, w3);
@@ -83,10 +93,29 @@ public static class Bootstrap
         owner.PasswordHash = hasher.HashPassword(owner, password!);
         db.Users.Add(owner);
 
+        foreach (var employee in new[]
+        {
+            (Login: foremanLogin, Password: foremanPassword!, Role: UserRole.Foreman),
+            (Login: workerLogin, Password: workerPassword!, Role: UserRole.Worker)
+        })
+        {
+            var user = new User
+            {
+                FactoryId = factory.Id,
+                WorkshopId = w3.Id,
+                Login = employee.Login,
+                NormalizedLogin = User.Normalize(employee.Login),
+                Role = employee.Role,
+                Status = UserStatus.Active
+            };
+            user.PasswordHash = hasher.HashPassword(user, employee.Password);
+            db.Users.Add(user);
+        }
+
         await db.SaveChangesAsync();
         await transaction.CommitAsync();
 
-        Console.WriteLine("База инициализирована. Владелец создан.");
+        Console.WriteLine("База инициализирована: 3 цеха по 100 кВт, подстанция 300 кВт, владелец, прораб и рабочий.");
         Console.WriteLine("Пароль в консоль не выводится.");
     }
 }
